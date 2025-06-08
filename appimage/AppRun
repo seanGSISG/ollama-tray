@@ -1,2 +1,11 @@
 #!/bin/bash
-exec python3 ./app/ollama-tray.py
+
+# Get the directory where the AppImage is mounted
+HERE="$(dirname "$(readlink -f "${0}")")"
+
+# Set up environment variables
+export PYTHONPATH="$HERE:$PYTHONPATH"
+export LD_LIBRARY_PATH="$HERE/usr/lib:$LD_LIBRARY_PATH"
+
+# Run the application
+exec python3 "$HERE/usr/bin/app/ollama-tray.py"

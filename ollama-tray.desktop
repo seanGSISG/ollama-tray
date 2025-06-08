@@ -1,6 +1,9 @@
 [Desktop Entry]
 Name=Ollama Tray
+Comment=Control and manage Ollama models from your system tray
 Exec=ollama-tray
 Icon=icon
 Type=Application
-Categories=Utility;
+Categories=Utility;AI;
+StartupNotify=true
+Version=0.3.0
