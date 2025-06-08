@@ -7,11 +7,11 @@ import os
 import sys
 import logging
 from PyQt5.QtWidgets import (
-    QDialog, QTabWidget, QVBoxLayout, QHBoxLayout, QLabel,
+    QDialog, QTabWidget, QVBoxLayout, QHBoxLayout, QLabel, QWidget,
     QLineEdit, QSpinBox, QPushButton, QFileDialog, QComboBox,
     QFormLayout, QGroupBox, QCheckBox, QDialogButtonBox,
     QTextBrowser, QTableWidget, QTableWidgetItem, QHeaderView,
-    QProgressBar, QMessageBox
+    QProgressBar, QMessageBox, QInputDialog
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon, QPixmap, QFont
@@ -319,7 +319,7 @@ class ModelsDialog(QDialog):
 
     def pull_model_dialog(self):
         """Show dialog to pull a new model"""
-        model_name, ok = QMessageBox.getText(
+        model_name, ok = QInputDialog.getText(
             self, "Pull Model",
             "Enter model name to download (e.g., 'llama2', 'llama2:7b'):"
         )

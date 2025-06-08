@@ -32,3 +32,16 @@ ehthumbs.db
 
 # Developer-only docs
 DEVREADME.md
+
+# Debug and test files
+debug_*.sh
+test_*.py
+resize_icon.py
+
+# Screenshots and temporary images
+Screenshot_*.png
+pasted file.png
+*.png.bak
+
+# Build tools
+appimagetool-*.AppImage

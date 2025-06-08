@@ -25,14 +25,15 @@ echo "Starting ollama-tray application..."
 echo "PYTHONPATH: $PYTHONPATH"
 echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
 
-# Find the main script and run it
-MAIN_SCRIPT="$HERE/usr/bin/app/ollama-tray.py"
-if [ -f "$MAIN_SCRIPT" ]; then
-    echo "Found main script at: $MAIN_SCRIPT"
-    exec python3 "$MAIN_SCRIPT" "$@"
+# Find the main script and run it as a module
+APP_DIR="$HERE/usr/bin"
+if [ -d "$APP_DIR/app" ]; then
+    echo "Found app module at: $APP_DIR/app"
+    cd "$APP_DIR"
+    exec python3 -m app "$@"
 else
-    echo "Error: Main script not found at $MAIN_SCRIPT"
-    echo "Searching for ollama-tray.py..."
-    find "$HERE" -name "ollama-tray.py"
+    echo "Error: App module not found at $APP_DIR/app"
+    echo "Searching for app directory..."
+    find "$HERE" -name "app" -type d
     exit 1
 fi
