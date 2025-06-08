@@ -2,10 +2,37 @@
 
 # Get the directory where the AppImage is mounted
 HERE="$(dirname "$(readlink -f "${0}")")"
+echo "AppImage mounted at: $HERE"
+
+# Check for required dependencies
+command -v python3 >/dev/null 2>&1 || { echo "Python3 is required but not installed. Aborting."; exit 1; }
+
+# Check for PyQt5
+python3 -c "import PyQt5" >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "PyQt5 is required but not installed. Please install it with: sudo apt-get install python3-pyqt5"
+    exit 1
+fi
 
 # Set up environment variables
-export PYTHONPATH="$HERE:$PYTHONPATH"
+export PYTHONPATH="$HERE:$HERE/usr/bin:$PYTHONPATH"
 export LD_LIBRARY_PATH="$HERE/usr/lib:$LD_LIBRARY_PATH"
+export QT_PLUGIN_PATH="$HERE/usr/lib/qt5/plugins:$QT_PLUGIN_PATH"
+export QT_QPA_PLATFORM_PLUGIN_PATH="$HERE/usr/lib/qt5/plugins/platforms:$QT_QPA_PLATFORM_PLUGIN_PATH"
 
-# Run the application
-exec python3 "$HERE/usr/bin/app/ollama-tray.py"
+# Debug information
+echo "Starting ollama-tray application..."
+echo "PYTHONPATH: $PYTHONPATH"
+echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+
+# Find the main script and run it
+MAIN_SCRIPT="$HERE/usr/bin/app/ollama-tray.py"
+if [ -f "$MAIN_SCRIPT" ]; then
+    echo "Found main script at: $MAIN_SCRIPT"
+    exec python3 "$MAIN_SCRIPT" "$@"
+else
+    echo "Error: Main script not found at $MAIN_SCRIPT"
+    echo "Searching for ollama-tray.py..."
+    find "$HERE" -name "ollama-tray.py"
+    exit 1
+fi

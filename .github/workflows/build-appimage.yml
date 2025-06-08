@@ -24,19 +24,27 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libfuse2 python3-pyqt5 libqt5gui5 libqt5widgets5 libqt5core5a
+        sudo apt-get install -y libfuse2 python3-pyqt5 libqt5gui5 libqt5widgets5 libqt5core5a desktop-file-utils patchelf
         python3 -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install PyQt5
 
     - name: Prepare AppDir
       run: |
         mkdir -p AppDir/usr/bin
+        mkdir -p AppDir/usr/lib/qt5/plugins/platforms
         cp -r app AppDir/usr/bin/
         cp ollama-tray.desktop AppDir/
         cp app/icon.png AppDir/icon.png
-        echo '#!/bin/bash' > AppDir/AppRun
-        echo 'exec python3 /usr/bin/app/ollama-tray.py' >> AppDir/AppRun
+        cp appimage/AppRun AppDir/AppRun
         chmod +x AppDir/AppRun
+
+        # Copy PyQt5 platform plugins for standalone operation
+        if [ -d /usr/lib/x86_64-linux-gnu/qt5/plugins/platforms ]; then
+          cp -r /usr/lib/x86_64-linux-gnu/qt5/plugins/platforms AppDir/usr/lib/qt5/plugins/
+        elif [ -d /usr/lib/python3/dist-packages/PyQt5/Qt5/plugins/platforms ]; then
+          cp -r /usr/lib/python3/dist-packages/PyQt5/Qt5/plugins/platforms AppDir/usr/lib/qt5/plugins/
+        fi
 
     - name: Download appimagetool
       run: |
@@ -48,14 +56,28 @@ jobs:
       run: |
         VERSION=$(date +'%Y%m%d')-$(git rev-parse --short HEAD)
         echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "::set-output name=version::$VERSION"
 
     - name: Build AppImage
       run: |
         chmod +x appimagetool-x86_64.AppImage
         ARCH=x86_64 APPIMAGE_EXTRACT_AND_RUN=1 ./appimagetool-x86_64.AppImage AppDir OllamaTray-${{ env.VERSION }}.AppImage
 
-    - name: Upload AppImage
+    - name: Upload AppImage as Artifact
       uses: actions/upload-artifact@v4
       with:
         name: OllamaTray-${{ env.VERSION }}
         path: OllamaTray-${{ env.VERSION }}.AppImage
+
+    - name: Create Release Tag
+      if: github.ref == 'refs/heads/main'
+      run: |
+        git tag v$VERSION
+        git push origin v$VERSION
+
+    - name: Create GitHub Release
+      if: github.ref == 'refs/heads/main'
+      run: |
+        gh release create v$VERSION OllamaTray-$VERSION.AppImage --title "OllamaTray v$VERSION" --notes "Automated build from main branch"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
