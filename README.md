@@ -4,6 +4,9 @@
 
 A lightweight Linux system tray application to monitor and control the `ollama` model server.
 
+![image](https://github.com/user-attachments/assets/d545c412-3378-44a8-98e0-6c9a3594b744)
+
+
 ## ✅ Features
 
 - Start/stop the `ollama` systemd service
