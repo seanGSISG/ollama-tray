@@ -1,0 +1,10 @@
+{
+  "id": "ollama-semantic-search",
+  "name": "Ollama Semantic Search",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Semantic search for your vault using Ollama embeddings",
+  "author": "Your Name",
+  "authorUrl": "https://github.com/yourusername",
+  "isDesktopOnly": true
+}

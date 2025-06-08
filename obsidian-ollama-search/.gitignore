@@ -1,0 +1,8 @@
+node_modules/
+npm-debug.log*
+.npm
+*.js.map
+.DS_Store
+main.js
+.idea/
+.vscode/
