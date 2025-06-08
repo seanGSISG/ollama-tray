@@ -1,0 +1,52 @@
+name: Build AppImage
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-appimage:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Prepare AppDir
+      run: |
+        mkdir -p AppDir/usr/bin
+        cp -r app AppDir/usr/bin/
+        cp ollama-tray.desktop AppDir/
+        cp app/ollama.png AppDir/icon.png
+        echo '#!/bin/bash' > AppDir/AppRun
+        echo 'exec python3 /usr/bin/app/ollama-tray.py' >> AppDir/AppRun
+        chmod +x AppDir/AppRun
+
+    - name: Download appimagetool
+      run: |
+        wget https://github.com/AppImage/AppImageKit/releases/latest/download/appimagetool-x86_64.AppImage
+        chmod +x appimagetool-x86_64.AppImage
+
+    - name: Build AppImage
+      run: |
+        ./appimagetool-x86_64.AppImage AppDir OllamaTray.AppImage
+
+    - name: Upload AppImage
+      uses: actions/upload-artifact@v3
+      with:
+        name: OllamaTray.AppImage
+        path: OllamaTray.AppImage

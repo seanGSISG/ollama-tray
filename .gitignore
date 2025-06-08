@@ -1,0 +1,34 @@
+
+# Byte-compiled / compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# AppImage build output
+AppDir/
+*.AppImage
+*.AppImage.zsync
+
+# Logs and temp
+*.log
+*.tmp
+*.bak
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Python environment files
+.env
+.venv
+env/
+venv/
+
+# System junk
+Thumbs.db
+ehthumbs.db
+
+# Developer-only docs
+DEVREADME.md
