@@ -257,6 +257,11 @@ class ModelsDialog(QDialog):
         remove_btn = QPushButton("Delete Model")
         remove_btn.clicked.connect(self.remove_selected_model)
         actions_layout.addWidget(remove_btn)
+        
+        # Run model in terminal
+        run_btn = QPushButton("Run in Terminal")
+        run_btn.clicked.connect(self.run_model_in_terminal)
+        actions_layout.addWidget(run_btn)
 
         layout.addLayout(actions_layout)
 
@@ -415,3 +420,63 @@ class ModelsDialog(QDialog):
 
         # Refresh model list
         self.load_models()
+    
+    def run_model_in_terminal(self):
+        """Run the selected model in a terminal"""
+        selected_items = self.models_table.selectedItems()
+        if not selected_items:
+            QMessageBox.information(self, "No Selection", "Please select a model to run.")
+            return
+        
+        # Get model name from the first column of the selected row
+        row = selected_items[0].row()
+        model_name = self.models_table.item(row, 0).text()
+        
+        # Check if service is running
+        try:
+            import subprocess
+            result = subprocess.run(['systemctl', '--user', 'is-active', 'ollama.service'], 
+                                  capture_output=True, text=True)
+            if result.stdout.strip() != 'active':
+                reply = QMessageBox.question(
+                    self, "Service Not Running",
+                    "Ollama service is not running. Would you like to start it first?",
+                    QMessageBox.Yes | QMessageBox.No
+                )
+                if reply == QMessageBox.Yes:
+                    subprocess.run(['systemctl', '--user', 'start', 'ollama.service'])
+                    # Wait a moment for service to start
+                    import time
+                    time.sleep(2)
+        except Exception as e:
+            logger.warning(f"Could not check service status: {e}")
+        
+        # Try different terminal emulators in order of preference
+        terminal_commands = [
+            # KDE Konsole
+            ['konsole', '-e', 'bash', '-c', f'ollama run {model_name}; echo "Press Enter to close..."; read'],
+            # GNOME Terminal
+            ['gnome-terminal', '--', 'bash', '-c', f'ollama run {model_name}; echo "Press Enter to close..."; read'],
+            # xterm (fallback)
+            ['xterm', '-e', 'bash', '-c', f'ollama run {model_name}; echo "Press Enter to close..."; read'],
+            # Generic x-terminal-emulator (Debian/Ubuntu)
+            ['x-terminal-emulator', '-e', 'bash', '-c', f'ollama run {model_name}; echo "Press Enter to close..."; read']
+        ]
+        
+        # Try each terminal command
+        for cmd in terminal_commands:
+            try:
+                import subprocess
+                subprocess.Popen(cmd)
+                logger.info(f"Launched terminal with model: {model_name}")
+                return
+            except FileNotFoundError:
+                continue
+            except Exception as e:
+                logger.error(f"Error launching terminal with {cmd[0]}: {e}")
+                continue
+        
+        # If we get here, no terminal worked
+        QMessageBox.critical(self, "Error", 
+                           "Could not find a suitable terminal emulator.\n"
+                           "Please run manually: ollama run " + model_name)

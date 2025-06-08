@@ -13,6 +13,7 @@ A lightweight Linux system tray application to monitor and control the `ollama` 
 - Tray notifications for model events
 - Open model directory in file manager
 - **NEW:** Model management (pull/delete models)
+- **NEW:** Run models directly in terminal from the UI
 - **NEW:** Customizable settings via configuration UI
 - **NEW:** About dialog with version information
 
